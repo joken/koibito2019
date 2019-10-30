@@ -1,4 +1,4 @@
-FROM 12-alpine
+FROM node:12-alpine
 LABEL maintainer="Mintaka Orionis <mintaka@0x9.pw>"
 
 ENV NODE_ENV=production
