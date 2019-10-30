@@ -1,6 +1,21 @@
 import { Configuration } from '@nuxt/types'
 
+type EnvironmentVariables = {
+  API_BASE_URL: string
+  PORT: number
+}
+
+const env: EnvironmentVariables = {
+  API_BASE_URL: process.env.API_BASE_URL || '',
+  PORT: Number(process.env.PORT) || 3000
+}
+
+if (env.API_BASE_URL === '') {
+  throw new Error('No set API_BASE_URL!')
+}
+
 const config: Configuration = {
+  port: env.PORT,
   mode: 'universal',
   /*
    ** Headers of the page
@@ -64,7 +79,7 @@ const config: Configuration = {
    */
   axios: {},
   proxy: {
-    '/api': 'http://localhost:4000'
+    '/api': env.API_BASE_URL
   },
   /*
    ** vuetify module configuration

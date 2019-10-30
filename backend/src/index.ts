@@ -1,52 +1,68 @@
 import 'reflect-metadata'
 import { validate } from 'class-validator'
+import connectRedis from 'connect-redis'
 import Express, { Router } from 'express'
 import session from 'express-session'
-import fs from 'fs-extra'
+import Redis from 'ioredis'
 import moment from 'moment'
 import schedule from 'node-schedule'
-import f from 'session-file-store'
 import { createConnection } from 'typeorm'
+
 import User, { Gender } from './entity/User'
 import questions from './data/questions'
 import matching from './matching'
+import env from './env'
 
 type ErrorResponse = {
   message: string
   errors: any[]
 }
 
-// For debug (default: undefined)
-const momentInitializeString = '2019-11-02T16:00:00'
-const matchedFilePath = './matched.json'
-
-createConnection()
+createConnection({
+  type: 'mariadb',
+  host: env.DATABASE_HOST,
+  port: env.DATABASE_PORT,
+  username: env.DATABASE_USER,
+  password: env.DATABASE_PASS,
+  database: env.DATABASE_NAME,
+  synchronize: true,
+  logging: false,
+  entities: ['src/entity/**/*.ts'],
+  migrations: ['src/migration/**/*.ts'],
+  subscribers: ['src/subscriber/**/*.ts'],
+  cli: {
+    entitiesDir: 'src/entity',
+    migrationsDir: 'src/migration',
+    subscribersDir: 'src/subscriber'
+  }
+})
   .then(async connection => {
     const userRepository = connection.getRepository(User)
     let matched = false
 
-    if (fs.pathExistsSync(matchedFilePath)) {
-      try {
-        const matchedFile = fs.readJsonSync(matchedFilePath)
+    const redis = new Redis({
+      host: env.REDIS_HOST,
+      port: env.REDIS_PORT
+    })
+    redis
+      .get('matchedAt')
+      .then(value => {
+        if (value == null) {
+          return
+        }
 
-        if (
-          moment(momentInitializeString).isSame(moment(matchedFile.date), 'day')
-        ) {
+        if (moment().isSame(moment(value), 'day')) {
           matched = true
         }
-      } catch (e) {
-        if (e != null) {
-          console.error(e)
-        }
-      }
-    }
+      })
+      .catch(console.error)
 
     const matchingFinishedDetection = schedule.scheduleJob(
       '*/1 * * * *',
       () => {
         if (
-          moment(momentInitializeString).isAfter(
-            moment(momentInitializeString).set({
+          moment().isAfter(
+            moment().set({
               hour: 15,
               minute: 0,
               second: 30,
@@ -58,9 +74,9 @@ createConnection()
             matching(userRepository)
               .then(() => {
                 matched = true
-                fs.outputJsonSync(matchedFilePath, {
-                  date: moment(momentInitializeString).toISOString()
-                })
+                redis
+                  .set('matchedAt', moment().toISOString())
+                  .catch(console.error)
               })
               .catch(console.error)
           } else {
@@ -76,19 +92,20 @@ createConnection()
     app.use(Express.urlencoded({ extended: true }))
     app.set('trust proxy', ['loopback', 'linklocal', 'uniquelocal'])
 
-    const FileStore = f(session)
+    const RedisStore = connectRedis(session)
     app.use(
       session({
-        store: new FileStore({
-          path: './sessions',
-          ttl: 30 * 86400
+        store: new RedisStore({
+          host: env.REDIS_HOST,
+          port: env.REDIS_PORT,
+          prefix: env.SESSION_REDIS_PREFIX
         }),
-        secret: 't9x*4J$&ZG8V%6w2#rbQGEXSBXooPh44',
+        secret: env.SESSION_SECRET,
         resave: false,
         saveUninitialized: false,
         cookie: {
           httpOnly: true,
-          expires: moment(momentInitializeString)
+          expires: moment()
             .endOf('day')
             .toDate(),
           secure: app.get('env') === 'production'
@@ -98,22 +115,19 @@ createConnection()
 
     const router = Router()
 
-    const todayQuestions = moment(momentInitializeString).isSame(
-      '2019-11-02',
-      'day'
-    )
+    const todayQuestions = moment().isSame('2019-11-02', 'day')
       ? questions.day1
       : questions.day2
 
     router.get('/status', async (req, res) => {
-      const canSubmit = moment(momentInitializeString).isBetween(
-        moment(momentInitializeString).set({
+      const canSubmit = moment().isBetween(
+        moment().set({
           hour: 9,
           minute: 0,
           second: 0,
           millisecond: 0
         }),
-        moment(momentInitializeString).set({
+        moment().set({
           hour: 15,
           minute: 0,
           second: 0,
@@ -136,8 +150,8 @@ createConnection()
 
     router.post('/submit', (req, res) => {
       if (
-        !moment(momentInitializeString).isBefore(
-          moment(momentInitializeString).set({
+        !moment().isBefore(
+          moment().set({
             hour: 15,
             minute: 0,
             second: 0,
