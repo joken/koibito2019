@@ -347,8 +347,8 @@ createConnection({
 
     app.use('/api', router)
 
-    app.listen(4000, () =>
-      console.log('koibito2019 backend listening on port 4000!')
+    app.listen(env.PORT, () =>
+      console.log(`koibito2019 backend listening on port ${env.PORT}!`)
     )
   })
   .catch(error => console.log(error))
