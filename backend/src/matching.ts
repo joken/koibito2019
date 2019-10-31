@@ -1,7 +1,6 @@
-// eslint-disable-next-line no-unused-vars
-import { Repository } from 'typeorm'
+import { Repository, Between } from 'typeorm'
 import * as _ from 'lodash'
-// eslint-disable-next-line no-unused-vars
+import moment from 'moment'
 import User, { Gender } from './entity/User'
 
 function euclideanDistance(xs: number[], ys: number[]): number {
@@ -154,7 +153,18 @@ async function matching(userRepository: Repository<User>): Promise<User[]> {
   await userRepository.save(users)
 
   const M2MUsers = await userRepository.find({
-    where: { gender: Gender.MALE, partnerGender: Gender.MALE }
+    where: {
+      gender: Gender.MALE,
+      partnerGender: Gender.MALE,
+      createdAt: Between(
+        moment()
+          .startOf('day')
+          .toDate(),
+        moment()
+          .endOf('day')
+          .toDate()
+      )
+    }
   })
   const M2MUsers2 = M2MUsers.splice(Math.floor(M2MUsers.length / 2))
 
@@ -172,7 +182,18 @@ async function matching(userRepository: Repository<User>): Promise<User[]> {
   console.groupEnd()
 
   const F2FUsers = await userRepository.find({
-    where: { gender: Gender.FEMALE, partnerGender: Gender.FEMALE }
+    where: {
+      gender: Gender.FEMALE,
+      partnerGender: Gender.FEMALE,
+      createdAt: Between(
+        moment()
+          .startOf('day')
+          .toDate(),
+        moment()
+          .endOf('day')
+          .toDate()
+      )
+    }
   })
   const F2FUsers2 = F2FUsers.splice(Math.floor(F2FUsers.length / 2))
 
@@ -190,10 +211,32 @@ async function matching(userRepository: Repository<User>): Promise<User[]> {
   console.groupEnd()
 
   const M2FUsers = await userRepository.find({
-    where: { gender: Gender.MALE, partnerGender: Gender.FEMALE }
+    where: {
+      gender: Gender.MALE,
+      partnerGender: Gender.FEMALE,
+      createdAt: Between(
+        moment()
+          .startOf('day')
+          .toDate(),
+        moment()
+          .endOf('day')
+          .toDate()
+      )
+    }
   })
   const F2MUsers = await userRepository.find({
-    where: { gender: Gender.FEMALE, partnerGender: Gender.MALE }
+    where: {
+      gender: Gender.FEMALE,
+      partnerGender: Gender.MALE,
+      createdAt: Between(
+        moment()
+          .startOf('day')
+          .toDate(),
+        moment()
+          .endOf('day')
+          .toDate()
+      )
+    }
   })
 
   const M2FUsersRanks = generateUsersRanks(M2FUsers, F2MUsers)
