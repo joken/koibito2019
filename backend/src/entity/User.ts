@@ -63,7 +63,7 @@ export default class User implements IUser {
   @Length(1, 30)
   name: string = ''
 
-  @Column({ enum: Gender, default: Gender.UNKNOWN })
+  @Column('enum', { enum: Gender, default: Gender.UNKNOWN })
   @IsEnum(Gender)
   gender: Gender = Gender.UNKNOWN
 
@@ -78,7 +78,7 @@ export default class User implements IUser {
   @IsUUID()
   partnerId: string | null = null
 
-  @Column({ enum: Gender, default: Gender.UNKNOWN })
+  @Column('enum', { enum: Gender, default: Gender.UNKNOWN })
   @IsEnum(Gender)
   partnerGender: Gender = Gender.UNKNOWN
 
