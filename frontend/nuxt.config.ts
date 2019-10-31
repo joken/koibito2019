@@ -1,17 +1,11 @@
 import { Configuration } from '@nuxt/types'
 
 type EnvironmentVariables = {
-  API_BASE_URL: string
   PORT: number
 }
 
 const env: EnvironmentVariables = {
-  API_BASE_URL: process.env.API_BASE_URL || '',
   PORT: Number(process.env.PORT) || 3000
-}
-
-if (env.API_BASE_URL === '') {
-  throw new Error('No set API_BASE_URL!')
 }
 
 const config: Configuration = {
@@ -70,7 +64,6 @@ const config: Configuration = {
   modules: [
     // Doc: https://axios.nuxtjs.org/usage
     '@nuxtjs/axios',
-    '@nuxtjs/proxy',
     '@nuxtjs/pwa'
   ],
   /*
@@ -78,9 +71,6 @@ const config: Configuration = {
    ** See https://axios.nuxtjs.org/options
    */
   axios: {},
-  proxy: {
-    '/api': env.API_BASE_URL
-  },
   /*
    ** vuetify module configuration
    ** https://github.com/nuxt-community/vuetify-module
