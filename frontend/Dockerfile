@@ -20,8 +20,8 @@ COPY package.json yarn.lock ./
 RUN yarn install
 
 COPY --from=builder /usr/src/koibito2019-frontend/.nuxt ./
-COPY --from=builder /usr/src/koibito2019-frontend/server ./
 COPY --from=builder /usr/src/koibito2019-frontend/static ./
+COPY --from=builder /usr/src/koibito2019-frontend/nuxt.config.ts ./
 
 EXPOSE 3000
 USER node
