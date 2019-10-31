@@ -9,7 +9,10 @@ const env: EnvironmentVariables = {
 }
 
 const config: Configuration = {
-  port: env.PORT,
+  server: {
+    host: '0.0.0.0',
+    port: env.PORT
+  },
   mode: 'universal',
   /*
    ** Headers of the page
