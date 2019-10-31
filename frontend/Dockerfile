@@ -1,7 +1,4 @@
-FROM node:12-alpine
-LABEL maintainer="Mintaka Orionis <mintaka@0x9.pw>"
-
-ENV NODE_ENV=production
+FROM node:12-alpine as builder
 
 WORKDIR /usr/src/koibito2019-frontend
 
@@ -10,6 +7,21 @@ RUN yarn install
 
 COPY . .
 RUN yarn build
+
+
+FROM node:12-alpine
+LABEL maintainer="Mintaka Orionis <mintaka@0x9.pw>"
+
+WORKDIR /usr/src/koibito2019-frontend
+
+ENV NODE_ENV=production
+
+COPY package.json yarn.lock ./
+RUN yarn install
+
+COPY --from=builder /usr/src/koibito2019-frontend/.nuxt ./
+COPY --from=builder /usr/src/koibito2019-frontend/server ./
+COPY --from=builder /usr/src/koibito2019-frontend/static ./
 
 EXPOSE 3000
 USER node
