@@ -3,20 +3,16 @@ import { validate } from 'class-validator'
 import connectRedis from 'connect-redis'
 import Express, { Router } from 'express'
 import session from 'express-session'
-import Redis from 'ioredis'
+import IORedis from 'ioredis'
 import moment from 'moment'
 import schedule from 'node-schedule'
+import Redis from 'redis'
 import { createConnection } from 'typeorm'
 
 import User, { Gender } from './entity/User'
 import questions from './data/questions'
 import matching from './matching'
 import env from './env'
-
-type ErrorResponse = {
-  message: string
-  errors: any[]
-}
 
 createConnection({
   type: 'mariadb',
@@ -40,7 +36,7 @@ createConnection({
     const userRepository = connection.getRepository(User)
     let matched = false
 
-    const redis = new Redis({
+    const redis = new IORedis({
       host: env.REDIS_HOST,
       port: env.REDIS_PORT
     })
@@ -96,9 +92,11 @@ createConnection({
     app.use(
       session({
         store: new RedisStore({
-          host: env.REDIS_HOST,
-          port: env.REDIS_PORT,
-          prefix: env.SESSION_REDIS_PREFIX
+          client: Redis.createClient({
+            host: env.REDIS_HOST,
+            port: env.REDIS_PORT,
+            prefix: env.SESSION_REDIS_PREFIX
+          })
         }),
         secret: env.SESSION_SECRET,
         resave: false,
