@@ -339,6 +339,20 @@ createConnection({
         })
     })
 
+    router.delete('/debug/matched', (req, res) => {
+      redis
+        .del('matchedAt')
+        .then(() => {
+          return res.status(204).send()
+        })
+        .catch(reason => {
+          console.error(reason)
+          return res
+            .status(500)
+            .send({ message: '内部エラーが発生しました', errors: [{ reason }] })
+        })
+    })
+
     app.use('/api', router)
 
     app.listen(env.PORT, () =>
