@@ -51,7 +51,7 @@ createConnection({
 
     const matchingFinishedDetection = schedule.scheduleJob(
       '*/1 * * * *',
-      () => {
+      async () => {
         if (
           moment().isAfter(
             moment().set({
@@ -218,7 +218,7 @@ createConnection({
       })
     })
 
-    router.get('/results', (req, res) => {
+    router.get('/results', async (req, res) => {
       if (!(await matched()) && req.header('X-Force-Get-Result') !== 'true') {
         return res.status(403).send({ message: '結果はまだありません' })
       } else if (req.session != null && req.session.userId != null) {
