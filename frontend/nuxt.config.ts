@@ -96,6 +96,12 @@ const config: Configuration = {
       description: '恋人探しアンケート2019 by 情報処理研究会',
       lang: 'ja',
       ogHost: 'koibito2019.0x9.pw'
+    },
+    manifest: {
+      name: '恋人探しアンケート',
+      short_name: '恋人探しアンケート',
+      description: '恋人探しアンケート2019 by 情報処理研究会',
+      lang: 'ja'
     }
   },
   /*
