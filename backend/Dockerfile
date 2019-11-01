@@ -1,7 +1,6 @@
 FROM node:12-alpine
-LABEL maintainer="Mintaka Orionis <mintaka@0x9.pw>"
 
-COPY --from=trajano/alpine-libfaketime  /faketime.so /lib/faketime.so
+COPY --from=lafr4nc3/libfaketime /libfaketimeMT.so.1 /lib/faketime.so
 ENV LD_PRELOAD=/lib/faketime.so
 
 ENV NODE_ENV=production
