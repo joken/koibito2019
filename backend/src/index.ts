@@ -39,7 +39,7 @@ createConnection({
       host: env.REDIS_HOST,
       port: env.REDIS_PORT
     })
-    async function matched(): boolean {
+    async function matched(): Promise<boolean> {
       const matchedAt = await redis.get('matchedAt')
 
       if (matchedAt == null) {
