@@ -40,18 +40,15 @@ createConnection({
       host: env.REDIS_HOST,
       port: env.REDIS_PORT
     })
-    redis
-      .get('matchedAt')
-      .then(value => {
-        if (value == null) {
-          return
-        }
+    async function matched(): boolean {
+      const matchedAt = await redis.get('matchedAt')
 
-        if (moment().isSame(moment(value), 'day')) {
-          matched = true
-        }
-      })
-      .catch(console.error)
+      if (value == null) {
+        return false
+      }
+
+      return moment().isSame(moment(matchedAd), 'day')
+    }
 
     const matchingFinishedDetection = schedule.scheduleJob(
       '*/1 * * * *',
@@ -66,10 +63,9 @@ createConnection({
             })
           )
         ) {
-          if (!matched) {
+          if (!matched()) {
             matching(userRepository)
               .then(() => {
-                matched = true
                 redis
                   .set('matchedAt', moment().toISOString())
                   .catch(console.error)
@@ -137,7 +133,7 @@ createConnection({
 
       res.status(200).send({
         canSubmit,
-        matched,
+        matched: matched(),
         submitted: user != null
       })
     })
@@ -224,7 +220,7 @@ createConnection({
     })
 
     router.get('/results', (req, res) => {
-      if (!matched && req.header('X-Force-Get-Result') !== 'true') {
+      if (!matched() && req.header('X-Force-Get-Result') !== 'true') {
         return res.status(403).send({ message: '結果はまだありません' })
       } else if (req.session != null && req.session.userId != null) {
         userRepository
@@ -334,7 +330,6 @@ createConnection({
     router.post('/debug/matching', (req, res) => {
       matching(userRepository)
         .then(users => {
-          matched = true
           return res.status(200).send({ users })
         })
         .catch(reason => {
