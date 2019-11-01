@@ -22,9 +22,9 @@ import {
 import { UsersRank } from '~/src/matching'
 
 export enum Gender {
-  UNKNOWN,
-  MALE,
-  FEMALE
+  UNKNOWN = 'unknown',
+  MALE = 'male',
+  FEMALE = 'female'
 }
 
 export interface IUser {
