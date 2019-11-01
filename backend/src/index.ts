@@ -34,7 +34,6 @@ createConnection({
 })
   .then(async connection => {
     const userRepository = connection.getRepository(User)
-    let matched = false
 
     const redis = new IORedis({
       host: env.REDIS_HOST,
@@ -43,11 +42,11 @@ createConnection({
     async function matched(): boolean {
       const matchedAt = await redis.get('matchedAt')
 
-      if (value == null) {
+      if (matchedAt == null) {
         return false
       }
 
-      return moment().isSame(moment(matchedAd), 'day')
+      return moment().isSame(moment(matchedAt), 'day')
     }
 
     const matchingFinishedDetection = schedule.scheduleJob(
