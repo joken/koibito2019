@@ -16,6 +16,7 @@ import env from './env'
 
 createConnection({
   type: 'mariadb',
+  charset: 'utf8mb4_unicode_ci',
   host: env.DATABASE_HOST,
   port: env.DATABASE_PORT,
   username: env.DATABASE_USER,

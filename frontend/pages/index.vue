@@ -37,7 +37,10 @@
         </v-alert>
       </v-col>
 
-      <v-col v-if="apiStatus.matched && !apiStatus.submitted" cols="12">
+      <v-col
+        v-if="!apiStatus.canSubmit && apiStatus.matched && !apiStatus.submitted"
+        cols="12"
+      >
         <v-alert class="my-2 my-sm-8" color="info">
           <div class="mt-4 font-weight-bold text-center">
             <p>未回答のため結果を見ることができません</p>
