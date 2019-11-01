@@ -298,9 +298,13 @@ createConnection({
             : partnerMinAge + partnerAgeRange
         users[i] = new User({
           name: `test${i}`,
-          gender: Math.floor(Math.random() * (2 - 1 + 1) + 1) as Gender,
+          gender: [Gender.UNKNOWN, Gender.MALE, Gender.FEMALE][
+            Math.floor(Math.random() * (2 - 1 + 1) + 1)
+          ],
           age: Math.floor(Math.random() * (100 + 1)),
-          partnerGender: Math.floor(Math.random() * (2 - 1 + 1) + 1) as Gender,
+          partnerGender: [Gender.UNKNOWN, Gender.MALE, Gender.FEMALE][
+            Math.floor(Math.random() * (2 - 1 + 1) + 1)
+          ],
           partnerMinAge,
           partnerMaxAge,
           answers: todayQuestions.map(() =>
