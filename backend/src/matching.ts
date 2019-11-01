@@ -91,7 +91,7 @@ async function matching(userRepository: Repository<User>): Promise<User[]> {
       prevTargetsRank !== undefined
         ? prevTargetsRank
         : generateUsersRanks(targets, users)
-    console.groupCollapsed('GSMatching', users, usersRank, targets, targetsRank)
+    console.groupCollapsed('GSMatching', users.length, targets.length)
     users.forEach((user, _, array) => {
       if (user.partnerId === null) {
         const targetInfo = usersRank[user.id].shift()
