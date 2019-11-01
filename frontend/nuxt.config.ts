@@ -25,7 +25,7 @@ const config: Configuration = {
       {
         hid: 'description',
         name: 'description',
-        content: '恋人探しアンケート'
+        content: '恋人探しアンケート2019 by 情報処理研究会'
       }
     ],
     link: [
@@ -90,7 +90,14 @@ const config: Configuration = {
       dark: true
     }
   },
-  pwa: {},
+  pwa: {
+    meta: {
+      name: '恋人探しアンケート',
+      description: '恋人探しアンケート2019 by 情報処理研究会',
+      lang: 'ja',
+      ogHost: 'koibito2019.0x9.pw'
+    }
+  },
   /*
    ** Build configuration
    */
