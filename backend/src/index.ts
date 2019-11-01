@@ -49,33 +49,28 @@ createConnection({
       return moment().isSame(moment(matchedAt), 'day')
     }
 
-    const matchingFinishedDetection = schedule.scheduleJob(
-      '*/1 * * * *',
-      async () => {
-        if (
-          moment().isAfter(
-            moment().set({
-              hour: 15,
-              minute: 0,
-              second: 30,
-              millisecond: 0
+    schedule.scheduleJob('*/1 * * * *', async () => {
+      if (
+        moment().isAfter(
+          moment().set({
+            hour: 15,
+            minute: 0,
+            second: 30,
+            millisecond: 0
+          })
+        )
+      ) {
+        if (!(await matched())) {
+          matching(userRepository)
+            .then(() => {
+              redis
+                .set('matchedAt', moment().toISOString())
+                .catch(console.error)
             })
-          )
-        ) {
-          if (!(await matched())) {
-            matching(userRepository)
-              .then(() => {
-                redis
-                  .set('matchedAt', moment().toISOString())
-                  .catch(console.error)
-              })
-              .catch(console.error)
-          } else {
-            matchingFinishedDetection.cancel()
-          }
+            .catch(console.error)
         }
       }
-    )
+    })
 
     const app = Express()
 
@@ -342,8 +337,8 @@ createConnection({
     router.delete('/debug/matched', (req, res) => {
       redis
         .del('matchedAt')
-        .then(() => {
-          return res.status(204).send()
+        .then(result => {
+          return res.status(204).send({ result })
         })
         .catch(reason => {
           console.error(reason)
