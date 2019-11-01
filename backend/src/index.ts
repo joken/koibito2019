@@ -62,7 +62,7 @@ createConnection({
             })
           )
         ) {
-          if (!matched()) {
+          if (!(await matched())) {
             matching(userRepository)
               .then(() => {
                 redis
@@ -132,7 +132,7 @@ createConnection({
 
       res.status(200).send({
         canSubmit,
-        matched: matched(),
+        matched: await matched(),
         submitted: user != null
       })
     })
@@ -219,7 +219,7 @@ createConnection({
     })
 
     router.get('/results', (req, res) => {
-      if (!matched() && req.header('X-Force-Get-Result') !== 'true') {
+      if (!(await matched()) && req.header('X-Force-Get-Result') !== 'true') {
         return res.status(403).send({ message: '結果はまだありません' })
       } else if (req.session != null && req.session.userId != null) {
         userRepository
