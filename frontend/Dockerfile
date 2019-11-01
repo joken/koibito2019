@@ -12,6 +12,9 @@ RUN yarn build
 FROM node:12-alpine
 LABEL maintainer="Mintaka Orionis <mintaka@0x9.pw>"
 
+COPY --from=trajano/alpine-libfaketime  /faketime.so /lib/faketime.so
+ENV LD_PRELOAD=/lib/faketime.so
+
 WORKDIR /usr/src/koibito2019-frontend
 
 ENV NODE_ENV=production
