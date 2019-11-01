@@ -95,17 +95,17 @@ async function matching(userRepository: Repository<User>): Promise<User[]> {
     users.forEach((user, _, array) => {
       if (user.partnerId === null) {
         const targetInfo = usersRank[user.id].shift()
-        console.debug('targetInfo', targetInfo)
+        //console.debug('targetInfo', targetInfo)
         if (targetInfo == null) return
 
         const target = targets.find(value => value.id === targetInfo.targetId)
-        console.debug('target', target)
+        //console.debug('target', target)
         if (target == null) return
 
         const userInfo = targetsRank[target.id].find(
           value => value.targetId === user.id
         )
-        console.debug('userInfo', userInfo)
+        //console.debug('userInfo', userInfo)
         if (userInfo == null) return
 
         if (target.partnerId === null) {
