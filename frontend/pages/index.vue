@@ -84,7 +84,7 @@
 
           <v-btn
             v-else
-            :disabled="apiStatus.canSubmit"
+            :disabled="!apiStatus.canSubmit"
             to="/questionnaire"
             nuxt
             class="mx-2"
