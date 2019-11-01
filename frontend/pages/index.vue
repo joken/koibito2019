@@ -38,7 +38,9 @@
       </v-col>
 
       <v-col
-        v-if="!apiStatus.canSubmit && apiStatus.matched && !apiStatus.submitted"
+        v-else-if="
+          !apiStatus.canSubmit && apiStatus.matched && !apiStatus.submitted
+        "
         cols="12"
       >
         <v-alert class="my-2 my-sm-8" color="info">
