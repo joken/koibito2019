@@ -53,6 +53,13 @@ function generateUsersRanks(users: User[], targets: User[]): UsersRanks {
               (10 / Math.abs(user.partnerMinAge - user.partnerMaxAge))
         }
 
+        if (score > Number.MAX_VALUE) {
+          score = Number.MAX_VALUE
+        }
+        if (score < Number.MIN_VALUE) {
+          score = Number.MIN_VALUE
+        }
+
         return {
           targetId: target.id,
           distance,
