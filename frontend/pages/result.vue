@@ -116,7 +116,9 @@ export default class extends Vue {
   apiStatus: APIStatus = {
     canSubmit: false,
     matched: false,
-    submitted: false
+    submitted: false,
+    startAt: '09:00',
+    endAt: '15:00'
   }
   error: ErrorResponse | null = null
   result: ResultResponse | null = null

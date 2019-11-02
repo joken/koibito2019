@@ -32,7 +32,7 @@
           <div class="mt-4 font-weight-bold text-center">
             <p>回答済みです</p>
             <p>結果発表までお待ち下さい</p>
-            <p>発表時間: 15:00 ～ 24:00</p>
+            <p>発表時間: {{ endAt }} ～ 24:00</p>
           </div>
         </v-alert>
       </v-col>
@@ -47,7 +47,6 @@
           <div class="mt-4 font-weight-bold text-center">
             <p>未回答のため結果を見ることができません</p>
             <p>次回、ご参加いただけると幸いです</p>
-            <p>日程: 11月2日/11月3日 09:00 ～ 15:00</p>
           </div>
         </v-alert>
       </v-col>
@@ -56,7 +55,7 @@
         <v-alert class="my-2 my-sm-8" color="error">
           <div class="mt-4 font-weight-bold text-center">
             <p>現在、回答時間外です</p>
-            <p>回答時間: 09:00 ～ 15:00</p>
+            <p>回答時間: {{ startAt }} ～ {{ endAt }}</p>
           </div>
         </v-alert>
       </v-col>
@@ -115,7 +114,9 @@ export default class extends Vue {
   apiStatus: APIStatus = {
     canSubmit: true,
     matched: false,
-    submitted: false
+    submitted: false,
+    startAt: '09:00',
+    endAt: '15:00'
   }
 
   mounted() {

@@ -1,4 +1,4 @@
-import moment = require('~/node_modules/moment')
+import moment from 'moment'
 
 const timeranges = {
   day1: [
