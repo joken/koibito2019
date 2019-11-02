@@ -89,7 +89,7 @@
           <v-card class="mb-2">
             <v-card-title>あなたについて</v-card-title>
             <v-card-text>
-              <v-form ref="form" lazy-validation>
+              <v-form ref="formAboutYou">
                 <v-text-field
                   id="name"
                   v-model="name"
@@ -103,14 +103,11 @@
                   <v-radio label="女" :value="enumGender.FEMALE" />
                 </v-radio-group>
 
-                <v-slider
+                <v-text-field
                   v-model="age"
-                  class="mt-2"
+                  type="number"
                   label="年齢"
-                  :min="0"
-                  :max="100"
-                  thumb-label="always"
-                  thumb-size="24"
+                  :rules="ageRules"
                 />
               </v-form>
             </v-card-text>
@@ -119,20 +116,23 @@
           <v-card class="mb-2">
             <v-card-title>相手について</v-card-title>
             <v-card-text>
-              <v-form>
+              <v-form ref="formAboutPartner">
                 <v-radio-group v-model="partnerGender" label="性別" row>
                   <v-radio label="男" :value="enumGender.MALE" />
                   <v-radio label="女" :value="enumGender.FEMALE" />
                 </v-radio-group>
 
-                <v-range-slider
-                  v-model="partnerAgeRange"
-                  class="mt-2"
-                  label="年齢の範囲"
-                  :min="0"
-                  :max="100"
-                  thumb-label="always"
-                  thumb-size="24"
+                <v-text-field
+                  v-model="partnerMinAge"
+                  type="number"
+                  label="年齢の下限"
+                  :rules="partnerMinAgeRules"
+                />
+                <v-text-field
+                  v-model="partnerMaxAge"
+                  type="number"
+                  label="年齢の上限"
+                  :rules="partnerMaxAgeRules"
                 />
               </v-form>
             </v-card-text>
@@ -255,9 +255,7 @@
                           <tr>
                             <td>年齢の範囲</td>
                             <td class="table-value">
-                              {{ partnerAgeRange[0] }}才から{{
-                                partnerAgeRange[1]
-                              }}才
+                              {{ partnerMinAge }}才から{{ partnerMaxAge }}才
                             </td>
                           </tr>
                         </tbody>
@@ -321,7 +319,6 @@ import axios from 'axios'
 import { Vue, Component } from 'vue-property-decorator'
 import Gender from '~/models/Gender'
 import { questionnaireStore } from '~/store'
-import { AgeRange } from '~/store/questionnaire'
 import { APIStatus } from '~/models/APIStatus'
 import { ErrorResponse } from '~/models/ErrorResponse'
 
@@ -340,15 +337,53 @@ export default class extends Vue {
   dialog: boolean = false
 
   nameRules = [
-    (v: string) => !!v || 'おなまえは必須項目です',
-    (v: string) => (v && v.length <= 30) || 'おなまえは30文字までです'
+    (v: string) => (v != null && v !== '') || 'おなまえは必須項目です',
+    (v: string) => (v != null && v.length <= 30) || 'おなまえは30文字までです'
   ]
+  ageRules = [
+    (v: number) => (v != null && v >= 0) || '年齢は0才以上にしてください',
+    (v: number) => (v != null && v <= 100) || '年齢は100才以下にしてください'
+  ]
+  get partnerMinAgeRules() {
+    return [
+      (v: number) =>
+        (v != null && v >= 0) || '年齢の下限は0才以上にしてください',
+      (v: number) =>
+        (v != null && v <= 100) || '年齢の下限は100才以下にしてください',
+      (v: number) =>
+        (v != null && v <= this.partnerMaxAge) ||
+        '年齢の下限は年齢の上限以下にしてください'
+    ]
+  }
+  get partnerMaxAgeRules() {
+    return [
+      (v: number) =>
+        (v != null && v >= 0) || '年齢の上限は0才以上にしてください',
+      (v: number) =>
+        (v != null && v <= 100) || '年齢の上限は100才以下にしてください',
+      (v: number) =>
+        (v != null && v >= this.partnerMinAge) ||
+        '年齢の上限は年齢の下限以上にしてください'
+    ]
+  }
+
+  validate() {
+    const formAboutYouValidate = (this.$refs.formAboutYou as Vue & {
+      validate: () => boolean
+    }).validate()
+    const formAboutPartnerValidate = (this.$refs.formAboutPartner as Vue & {
+      validate: () => boolean
+    }).validate()
+
+    return formAboutYouValidate && formAboutPartnerValidate
+  }
 
   name: string = ''
   gender: Gender = Gender.UNKNOWN
   age: number = 0
   partnerGender: Gender = Gender.UNKNOWN
-  partnerAgeRange: AgeRange = [0, 100]
+  partnerMinAge: number = 0
+  partnerMaxAge: number = 100
 
   get questions() {
     return questionnaireStore.getQuestions
@@ -388,7 +423,7 @@ export default class extends Vue {
     }
   }
   confirm() {
-    if ((this.$refs.form as Vue & { validate: () => boolean }).validate()) {
+    if (this.validate()) {
       this.dialog = true
     } else {
       this.$vuetify.goTo('#name', { offset: 120 })
@@ -400,7 +435,10 @@ export default class extends Vue {
     questionnaireStore.SET_GENDER(this.gender)
     questionnaireStore.SET_AGE(this.age)
     questionnaireStore.SET_PARTNER_GENDER(this.partnerGender)
-    questionnaireStore.SET_PARTNER_AGE_RANGE(this.partnerAgeRange)
+    questionnaireStore.SET_PARTNER_AGE_RANGE([
+      this.partnerMinAge,
+      this.partnerMaxAge
+    ])
 
     await axios
       .post('/api/submit', {
@@ -408,8 +446,8 @@ export default class extends Vue {
         gender: questionnaireStore.getGender,
         age: questionnaireStore.getAge,
         partnerGender: questionnaireStore.getPartnerGender,
-        partnerMinAge: questionnaireStore.getPartnerAgeRange[0],
-        partnerMaxAge: questionnaireStore.getPartnerAgeRange[1],
+        partnerMinAge: questionnaireStore.getPartnerMinAge,
+        partnerMaxAge: questionnaireStore.getPartnerMaxAge,
         answers: questionnaireStore.getAnswers
       })
       .then(() => {
@@ -430,7 +468,8 @@ export default class extends Vue {
     this.gender = questionnaireStore.getGender
     this.age = questionnaireStore.getAge
     this.partnerGender = questionnaireStore.getPartnerGender
-    this.partnerAgeRange = questionnaireStore.getPartnerAgeRange
+    this.partnerMinAge = questionnaireStore.getPartnerMinAge
+    this.partnerMaxAge = questionnaireStore.getPartnerMaxAge
   }
 }
 </script>

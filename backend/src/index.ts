@@ -11,6 +11,7 @@ import { createConnection } from 'typeorm'
 
 import User, { Gender } from './entity/User'
 import questions from './data/questions'
+import timeranges from './data/timerange'
 import matching from './matching'
 import env from './env'
 
@@ -51,16 +52,7 @@ createConnection({
     }
 
     schedule.scheduleJob('*/1 * * * *', async () => {
-      if (
-        moment().isAfter(
-          moment().set({
-            hour: 15,
-            minute: 0,
-            second: 30,
-            millisecond: 0
-          })
-        )
-      ) {
+      if (moment().isAfter(timerange[1].add(30, 'second'))) {
         if (!(await matched())) {
           matching(userRepository)
             .then(() => {
@@ -107,29 +99,21 @@ createConnection({
     const todayQuestions = moment().isSame('2019-11-02', 'day')
       ? questions.day1
       : questions.day2
+    const timerange = moment().isSame('2019-11-02', 'day')
+      ? timeranges.day1
+      : timeranges.day2
 
     router.get('/status', async (req, res) => {
-      const canSubmit = moment().isBetween(
-        moment().set({
-          hour: 9,
-          minute: 0,
-          second: 0,
-          millisecond: 0
-        }),
-        moment().set({
-          hour: 15,
-          minute: 0,
-          second: 0,
-          millisecond: 0
-        })
-      )
+      const canSubmit = moment().isBetween(timerange[0], timerange[1])
 
       const user = await userRepository.findOne({ id: req.session!.userId })
 
       res.status(200).send({
         canSubmit,
         matched: await matched(),
-        submitted: user != null
+        submitted: user != null,
+        startAt: timerange[0].format('H:m'),
+        endAt: timerange[1].format('H:m')
       })
     })
 
@@ -139,14 +123,7 @@ createConnection({
 
     router.post('/submit', (req, res) => {
       if (
-        !moment().isBefore(
-          moment().set({
-            hour: 15,
-            minute: 0,
-            second: 0,
-            millisecond: 0
-          })
-        ) &&
+        !moment().isBetween(timerange[0], timerange[1]) &&
         req.header('X-Force-Submit') !== 'true'
       ) {
         return res.status(403).send({ message: '回答時間外です' })

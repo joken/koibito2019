@@ -3,14 +3,13 @@ import { Module, Mutation, Action, VuexModule } from 'vuex-module-decorators'
 import Gender from '~/models/Gender'
 import InputError from '~/error/InputError'
 
-export type AgeRange = [number, number]
-
 export interface IQuestionnaireState {
   name: string
   gender: Gender
   age: number
   partnerGender: Gender
-  partnerAgeRange: AgeRange
+  partnerMinAge: number
+  partnerMaxAge: number
   questions: string[]
   answers: number[]
 }
@@ -22,7 +21,8 @@ export default class Questionnaire extends VuexModule
   gender: Gender = Gender.UNKNOWN
   age: number = 0
   partnerGender: Gender = Gender.UNKNOWN
-  partnerAgeRange: AgeRange = [0, 100]
+  partnerMinAge: number = 0
+  partnerMaxAge: number = 100
   questions: string[] = []
   answers: number[] = []
 
@@ -38,8 +38,11 @@ export default class Questionnaire extends VuexModule
   get getPartnerGender() {
     return this.partnerGender
   }
-  get getPartnerAgeRange() {
-    return this.partnerAgeRange
+  get getPartnerMinAge() {
+    return this.partnerMinAge
+  }
+  get getPartnerMaxAge() {
+    return this.partnerMaxAge
   }
   get getQuestions() {
     return this.questions
@@ -69,9 +72,7 @@ export default class Questionnaire extends VuexModule
     this.partnerGender = partnerGender
   }
   @Mutation
-  SET_PARTNER_AGE_RANGE(partnerAgeRange: AgeRange) {
-    const partnerMinAge = partnerAgeRange[0]
-    const partnerMaxAge = partnerAgeRange[1]
+  SET_PARTNER_AGE_RANGE([partnerMinAge, partnerMaxAge]: [number, number]) {
     if (partnerMinAge < 0 || partnerMinAge > 100) {
       throw new InputError('partnerMinAge must be between 0 and 100')
     }
@@ -84,7 +85,8 @@ export default class Questionnaire extends VuexModule
       )
     }
 
-    this.partnerAgeRange = partnerAgeRange
+    this.partnerMinAge = partnerMinAge
+    this.partnerMaxAge = partnerMaxAge
   }
   @Mutation
   SET_QUESTIONS(questions: string[]) {
