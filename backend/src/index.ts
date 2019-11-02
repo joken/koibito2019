@@ -52,7 +52,8 @@ createConnection({
     }
 
     schedule.scheduleJob('*/1 * * * *', async () => {
-      if (moment().isAfter(timerange[1].add(30, 'second'))) {
+      const endAt = moment(timerange[1])
+      if (moment().isAfter(endAt.add(30, 'second'))) {
         if (!(await matched())) {
           matching(userRepository)
             .then(() => {
