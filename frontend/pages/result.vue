@@ -32,7 +32,7 @@
           <v-alert class="my-2 my-sm-8" color="error">
             <div class="mt-4 font-weight-bold text-center">
               <p>結果はまだありません</p>
-              <p>結果発表時間: 15:00 ～ 24:00</p>
+              <p>結果発表時間: {{ apiStatus.endAt }} ～ 24:00</p>
             </div>
           </v-alert>
         </v-col>

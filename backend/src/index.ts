@@ -112,8 +112,8 @@ createConnection({
         canSubmit,
         matched: await matched(),
         submitted: user != null,
-        startAt: timerange[0].format('H:m'),
-        endAt: timerange[1].format('H:m')
+        startAt: timerange[0].format('HH:mm'),
+        endAt: timerange[1].format('HH:mm')
       })
     })
 
