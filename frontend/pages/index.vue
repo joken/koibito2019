@@ -119,7 +119,7 @@ export default class extends Vue {
   }
 
   mounted() {
-    axios.get('/api/status').then((value) => {
+    axios.get('/api/status').then(value => {
       this.apiStatus = value.data
     })
   }

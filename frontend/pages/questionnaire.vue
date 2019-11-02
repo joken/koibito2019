@@ -143,18 +143,18 @@
       <v-row justify="center">
         <v-col cols="10">
           <v-card
-            v-for="(questionnaire, index) in questionnaires"
+            v-for="(question, index) in questions"
             :key="index"
             class="mb-2"
           >
             <v-card-title>第{{ index + 1 }}問</v-card-title>
             <v-card-text>
               <div class="headline font-weight-bold text--primary">
-                {{ questionnaire.question }}
+                {{ question }}
               </div>
             </v-card-text>
             <v-card-actions class="mt-n4">
-              <v-radio-group v-model="questionnaire.answer" class="mx-4">
+              <v-radio-group v-model="answers[index]" class="mx-4">
                 <v-radio :value="5">
                   <template v-slot:label>
                     <div class="text--primary">
@@ -227,7 +227,7 @@
                           <tr>
                             <td>性別</td>
                             <td class="table-value">
-                              {{ gender }}
+                              {{ genderText(gender) }}
                             </td>
                           </tr>
                           <tr>
@@ -249,7 +249,7 @@
                           <tr>
                             <td>性別</td>
                             <td class="table-value">
-                              {{ partnerGender }}
+                              {{ genderText(partnerGender) }}
                             </td>
                           </tr>
                           <tr>
@@ -282,12 +282,12 @@
                         </thead>
                         <tbody>
                           <tr
-                            v-for="(questionnaire, index) in questionnaires"
+                            v-for="(question, index) in questions"
                             :key="index"
                           >
-                            <td>{{ questionnaire.question }}</td>
+                            <td>{{ question }}</td>
                             <td class="table-value">
-                              {{ answerText(questionnaire.answer) }}
+                              {{ answerText(answers[index]) }}
                             </td>
                           </tr>
                         </tbody>
@@ -317,11 +317,9 @@
 </template>
 
 <script lang="ts">
-import _ from 'lodash'
 import axios from 'axios'
 import { Vue, Component } from 'vue-property-decorator'
 import Gender from '~/models/Gender'
-import Questionnaire from '~/models/Questionnaire'
 import { questionnaireStore } from '~/store'
 import { AgeRange } from '~/store/questionnaire'
 import { APIStatus } from '~/models/APIStatus'
@@ -352,21 +350,15 @@ export default class extends Vue {
   partnerGender: Gender = Gender.UNKNOWN
   partnerAgeRange: AgeRange = [0, 100]
 
-  get questionnaires(): Questionnaire[] {
-    return _.zipWith(
-      questionnaireStore.questions,
-      questionnaireStore.answers,
-      (q, a) => {
-        return { question: q, answer: a }
-      }
-    )
+  get questions() {
+    return questionnaireStore.getQuestions
   }
-  set questionnaires(value) {
-    questionnaireStore.SET_ANSWERS(
-      value.map((questionnaire) => {
-        return questionnaire.answer
-      })
-    )
+
+  get answers() {
+    return questionnaireStore.getAnswers
+  }
+  set answers(value) {
+    questionnaireStore.SET_ANSWERS(value)
   }
 
   answerText(answer: number) {
@@ -383,6 +375,16 @@ export default class extends Vue {
         return '思う'
       default:
         return ''
+    }
+  }
+  genderText(gender: Gender) {
+    switch (gender) {
+      case Gender.UNKNOWN:
+        return '不明'
+      case Gender.MALE:
+        return '男'
+      case Gender.FEMALE:
+        return '女'
     }
   }
   confirm() {
@@ -402,33 +404,33 @@ export default class extends Vue {
 
     await axios
       .post('/api/submit', {
-        name: questionnaireStore.name,
-        gender: questionnaireStore.gender,
-        age: questionnaireStore.age,
-        partnerGender: questionnaireStore.partnerGender,
-        partnerMinAge: questionnaireStore.partnerAgeRange[0],
-        partnerMaxAge: questionnaireStore.partnerAgeRange[1],
-        answers: questionnaireStore.answers
+        name: questionnaireStore.getName,
+        gender: questionnaireStore.getGender,
+        age: questionnaireStore.getAge,
+        partnerGender: questionnaireStore.getPartnerGender,
+        partnerMinAge: questionnaireStore.getPartnerAgeRange[0],
+        partnerMaxAge: questionnaireStore.getPartnerAgeRange[1],
+        answers: questionnaireStore.getAnswers
       })
       .then(() => {
         this.submitted = true
       })
-      .catch((err) => {
+      .catch(err => {
         this.error = err.response.data.error
       })
   }
 
   mounted() {
-    axios.get('/api/status').then((value) => {
+    axios.get('/api/status').then(value => {
       this.apiStatus = value.data
     })
 
-    questionnaireStore.getQuestions()
-    this.name = questionnaireStore.name
-    this.gender = questionnaireStore.gender
-    this.age = questionnaireStore.age
-    this.partnerGender = questionnaireStore.partnerGender
-    this.partnerAgeRange = questionnaireStore.partnerAgeRange
+    questionnaireStore.obtainQuestions()
+    this.name = questionnaireStore.getName
+    this.gender = questionnaireStore.getGender
+    this.age = questionnaireStore.getAge
+    this.partnerGender = questionnaireStore.getPartnerGender
+    this.partnerAgeRange = questionnaireStore.getPartnerAgeRange
   }
 }
 </script>

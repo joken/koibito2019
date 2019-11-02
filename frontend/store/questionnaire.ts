@@ -26,6 +26,28 @@ export default class Questionnaire extends VuexModule
   questions: string[] = []
   answers: number[] = []
 
+  get getName() {
+    return this.name
+  }
+  get getGender() {
+    return this.gender
+  }
+  get getAge() {
+    return this.age
+  }
+  get getPartnerGender() {
+    return this.partnerGender
+  }
+  get getPartnerAgeRange() {
+    return this.partnerAgeRange
+  }
+  get getQuestions() {
+    return this.questions
+  }
+  get getAnswers() {
+    return this.answers
+  }
+
   @Mutation
   SET_NAME(name: string) {
     this.name = name
@@ -84,7 +106,7 @@ export default class Questionnaire extends VuexModule
   }
 
   @Action
-  async getQuestions() {
+  async obtainQuestions() {
     const res = await axios.get('/api/questions')
     const newQuestions = res.data
 

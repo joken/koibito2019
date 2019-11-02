@@ -24,6 +24,8 @@ module.exports = {
     'space-before-function-paren': 'off',
     'import/no-mutable-exports': 'off',
     'vue/singleline-html-element-content-newline': 'off',
-    'vue/max-attributes-per-line': 'off'
+    'vue/max-attributes-per-line': 'off',
+    'arrow-parens': 'off',
+    'prettier/prettier': ['error', { arrowParens: 'avoid' }]
   }
 }

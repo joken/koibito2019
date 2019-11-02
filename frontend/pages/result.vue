@@ -128,10 +128,10 @@ export default class extends Vue {
     if (this.apiStatus.matched) {
       await axios
         .get('/api/results')
-        .then((result) => {
+        .then(result => {
           this.result = result.data
         })
-        .catch((err) => {
+        .catch(err => {
           this.error = err.response.data
         })
     }
