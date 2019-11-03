@@ -60,9 +60,13 @@ export default class Questionnaire extends VuexModule
     this.gender = gender
   }
   @Mutation
-  SET_AGE(age: number) {
+  SET_AGE(age: string | number) {
     if (age < 0 || age > 100) {
       throw new InputError('age must be between 0 and 100')
+    }
+
+    if (typeof age === 'string') {
+      age = Number.parseInt(age, 10)
     }
 
     this.age = age
@@ -72,7 +76,10 @@ export default class Questionnaire extends VuexModule
     this.partnerGender = partnerGender
   }
   @Mutation
-  SET_PARTNER_AGE_RANGE([partnerMinAge, partnerMaxAge]: [number, number]) {
+  SET_PARTNER_AGE_RANGE([partnerMinAge, partnerMaxAge]: [
+    string | number,
+    string | number
+  ]) {
     if (partnerMinAge < 0 || partnerMinAge > 100) {
       throw new InputError('partnerMinAge must be between 0 and 100')
     }
@@ -83,6 +90,13 @@ export default class Questionnaire extends VuexModule
       throw new InputError(
         'partnerMinAge must be less than or equal to partnerMaxAge'
       )
+    }
+
+    if (typeof partnerMinAge === 'string') {
+      partnerMinAge = Number.parseInt(partnerMinAge, 10)
+    }
+    if (typeof partnerMaxAge === 'string') {
+      partnerMaxAge = Number.parseInt(partnerMaxAge, 10)
     }
 
     this.partnerMinAge = partnerMinAge
