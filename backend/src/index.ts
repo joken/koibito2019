@@ -37,6 +37,13 @@ createConnection({
   .then(async connection => {
     const userRepository = connection.getRepository(User)
 
+    const todayQuestions = moment().isSame('2019-11-02', 'day')
+      ? questions.day1
+      : questions.day2
+    const timerange = moment().isSame('2019-11-02', 'day')
+      ? timeranges.day1
+      : timeranges.day2
+
     const redis = new IORedis({
       host: env.REDIS_HOST,
       port: env.REDIS_PORT
@@ -96,13 +103,6 @@ createConnection({
     )
 
     const router = Router()
-
-    const todayQuestions = moment().isSame('2019-11-02', 'day')
-      ? questions.day1
-      : questions.day2
-    const timerange = moment().isSame('2019-11-02', 'day')
-      ? timeranges.day1
-      : timeranges.day2
 
     router.get('/status', async (req, res) => {
       const canSubmit = moment().isBetween(timerange[0], timerange[1])
